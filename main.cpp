@@ -104,24 +104,30 @@ void triangle(Vec2i* pts, TGAImage& image, TGAColor color) {
 
 int main(int argc, char** argv) {
 #pragma region 模型读入
-    ////文件绘制
-   //if (2 == argc) {
-   //    model = new Model(argv[1]);
-   //}
-   //else {
-   //    model = new Model("obj/african_head.obj");
-   //}
-   ////读取二维图像顶点
+    //文件绘制
+   if (2 == argc) {
+       model = new Model(argv[1]);
+   }
+   else {
+       model = new Model("obj/african_head.obj");
+   }
+   //读取二维图像顶点
 #pragma endregion
 
-   
-    TGAImage frame(200, 200, TGAImage::RGB);
-    Vec2i pts[3] = { Vec2i(10,10), Vec2i(100, 30), Vec2i(190, 160) };
-    triangle(pts, frame, red);
+   TGAImage image(width, height, TGAImage::RGB);
+    for (int i = 0; i < model->nfaces(); i++) {
+        std::vector<int> face = model->face(i);
+        Vec2i screen_coords[3];
+        for (int j = 0; j < 3; j++) {
+            Vec3f world_coords = model->vert(face[j]);
+            screen_coords[j] = Vec2i((world_coords.x + 1.) * width / 2., (world_coords.y + 1.) * height / 2.);
+        }
+        triangle(&screen_coords[0], image, TGAColor(rand() % 255, rand() % 255, rand() % 255, 255));
+    }
 #pragma region 文件输出
     //文件输出
-    frame.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-    frame.write_tga_file("framebuffer.tga");
+    image.write_tga_file("model_tri.tga");
+    delete model;
     
 #pragma endregion
 

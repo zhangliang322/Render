@@ -1,4 +1,4 @@
-#include <vector>
+ï»¿#include <vector>
 #include <cmath>
 #include "tgaimage.h"
 #include "model.h"
@@ -7,89 +7,98 @@
 const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor red = TGAColor(255, 0, 0, 255);
 const TGAColor blue = TGAColor(0, 0, 255, 255);
+const TGAColor green = TGAColor(0, 255, 0, 255);
 Model* model = NULL;
-const int width = 800;
-const int height = 800;
-//draw a line ,Öğ¸ö¶¥µã 0.01Á¬³ÉÏß
-void line(int x0, int y0, int x1, int y1, TGAImage& image, TGAColor color) {
-#pragma region ÊäÈë¼ì²é
-    bool steep = false;//±ê¼Ç
-    if (std::abs(x0 - x1) < std::abs(y0 - y1)) {//line ¸ß¶È´óÓÚ¿í¶È
-        std::swap(x0, y0);
-        std::swap(x1, y1);
+const int width = 200;
+const int height = 200;
+//draw a line ,é€ä¸ªé¡¶ç‚¹ 0.01è¿æˆçº¿
+void line(Vec2i p0, Vec2i p1, TGAImage& image, TGAColor color) {
+#pragma region è¾“å…¥æ£€æŸ¥
+    bool steep = false;//æ ‡è®°
+    if (std::abs(p0.x - p1.x) < std::abs(p0.y - p1.y)) {//line é«˜åº¦å¤§äºå®½åº¦
+        std::swap(p0.x, p0.y);
+        std::swap(p1.x, p1.y);
         steep = true;
     }
-    if (x0 > x1) { // Èç¹ûÊäÈë×ø±êË³Ğò²»¶Ô£¬×óÓÒ·´×ª£¬±£Ö¤´Ó×óµ½ÓÒ
-        std::swap(x0, x1);
-        std::swap(y0, y1);
+    if (p0.x > p1.x) { // å¦‚æœè¾“å…¥åæ ‡é¡ºåºä¸å¯¹ï¼Œå·¦å³åè½¬ï¼Œä¿è¯ä»å·¦åˆ°å³
+        std::swap(p0, p1);
     }
 #pragma endregion
 
-#pragma region »æÖÆ
-    int dx = x1 - x0;
-    int dy = y1 - y0;
-    //Ô¤ÏÈËã³ö¹Ø¼ü²ÎÊıĞ±ÂÊ£¬½øĞĞÓÅ»¯£¬±ÜÃâforÖĞÖØ¸´¼ÆËã
-    //ÓÅ»¯µô¸¡µãÊı£¬Ö±½ÓºÍx±È½Ï
+#pragma region ç»˜åˆ¶
+    int dx = p1.x - p0.x;
+    int dy = p1.y - p0.y;
+    //é¢„å…ˆç®—å‡ºå…³é”®å‚æ•°æ–œç‡ï¼Œè¿›è¡Œä¼˜åŒ–ï¼Œé¿å…forä¸­é‡å¤è®¡ç®—
+    //ä¼˜åŒ–æ‰æµ®ç‚¹æ•°ï¼Œç›´æ¥å’Œxæ¯”è¾ƒ
     int derror2 = std::abs(dy) * 2;
     float error2 = 0;
-    int y = y0;
+    int y = p0.y;
     
-    //ÒòÎªÏŞÖÆÁËx±Èy³¤£¬Òò´ËÔÚÓÒ±ßÈı½ÇĞÎÇøÓò¼´¿É
-    //Èç¹û·ûºÏÔö³¤Ìõ¼ş¾ÍÉÏÉı£¨Êµ¼ÊÊÇµãµÄĞÎÊ½£©
+    //å› ä¸ºé™åˆ¶äº†xæ¯”yé•¿ï¼Œå› æ­¤åœ¨å³è¾¹ä¸‰è§’å½¢åŒºåŸŸå³å¯
+    //å¦‚æœç¬¦åˆå¢é•¿æ¡ä»¶å°±ä¸Šå‡ï¼ˆå®é™…æ˜¯ç‚¹çš„å½¢å¼ï¼‰
     
-    if (steep) {//°Ñ¶¸ÇÍÅĞ¶Ï´ÓforÑ­»·ÖĞ²ğ³öÀ´½øĞĞÓÅ»¯£¬Ë«±¶´úÂë Ë«±¶ËÙ¶È
-        for (int x = x0; x <= x1; ++x) {
+    if (steep) {//æŠŠé™¡å³­åˆ¤æ–­ä»forå¾ªç¯ä¸­æ‹†å‡ºæ¥è¿›è¡Œä¼˜åŒ–ï¼ŒåŒå€ä»£ç  åŒå€é€Ÿåº¦
+        for (int x = p0.x; x <= p1.x; ++x) {
             image.set(y, x, color);
             error2 += derror2;
             if (error2 > dx) {
-                y += (y1 > y0 ? 1 : -1);
+                y += (p1.y > p0.y ? 1 : -1);
                 error2 -= dx * 2;
             }
         }
     }
     else {
-        for (int x = x0; x <= x1; ++x) {
+        for (int x = p0.x; x <= p1.x; ++x) {
             image.set(x, y, color);
             error2 += derror2;
-            //Õğµ´·½Ê½»­ÏñËØ,ÓÅ»¯Ôö³¤¹ı³Ì£¨ÒòÎª±¾À´Ò²ÊÇÈ¡Õû£©
-            if (error2 > dx) {//ÓÅ»¯µô¸¡µãÊı£¬Ö±½Ó2yºÍx±È½Ï
-                y += (y1 > y0 ? 1 : -1);
-                error2 -= dx * 2;//Í¬Ñù¸ü¸ÄÕğµ´·½Ê½
+            //éœ‡è¡æ–¹å¼ç”»åƒç´ ,ä¼˜åŒ–å¢é•¿è¿‡ç¨‹ï¼ˆå› ä¸ºæœ¬æ¥ä¹Ÿæ˜¯å–æ•´ï¼‰
+            if (error2 > dx) {//ä¼˜åŒ–æ‰æµ®ç‚¹æ•°ï¼Œç›´æ¥2yå’Œxæ¯”è¾ƒ
+                y += (p1.y > p0.y ? 1 : -1);
+                error2 -= dx * 2;//åŒæ ·æ›´æ”¹éœ‡è¡æ–¹å¼
             }
         }
     }
 #pragma endregion
     }
+//ç»˜åˆ¶ä¸‰è§’å½¢
+void triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage& image, TGAColor color) {
+    // sort the vertices, t0, t1, t2 lowerâˆ’toâˆ’upper (bubblesort yay!) 
+    //t0æ˜¯æœ€ä½ç‚¹ï¼Œt2æ˜¯æœ€é«˜ç‚¹ï¼ˆæŒ‰ç…§yåæ ‡æ’ï¼‰ï¼Œt0-t2æ˜¯è¾¹ç•Œç‚¹
+    if (t0.y > t1.y) std::swap(t0, t1);
+    if (t0.y > t2.y) std::swap(t0, t2);
+    if (t1.y > t2.y) std::swap(t1, t2);
 
+    line(t0, t1, image, green);
+    line(t1, t2, image, green);
+    line(t2, t0, image, red);
+
+}
 int main(int argc, char** argv) {
-    //ÎÄ¼ş»æÖÆ
-    if (2 == argc) {
-        model = new Model(argv[1]);
-    }
-    else {
-        model = new Model("obj/african_head.obj");
-    }
-    //¶ÁÈ¡¶şÎ¬Í¼Ïñ¶¥µã
+#pragma region æ¨¡å‹è¯»å…¥
+    ////æ–‡ä»¶ç»˜åˆ¶
+   //if (2 == argc) {
+   //    model = new Model(argv[1]);
+   //}
+   //else {
+   //    model = new Model("obj/african_head.obj");
+   //}
+   ////è¯»å–äºŒç»´å›¾åƒé¡¶ç‚¹
+#pragma endregion
+
+   
     TGAImage image(width, height, TGAImage::RGB);
-    for (int i = 0; i < model->nfaces(); i++) {
-        std::vector<int> face = model->face(i);
-        for (int j = 0; j < 3; j++) {
-            //¶ÁÈ¡¶şÎ¬Í¼Ïñ¶¥µã
-            Vec3f v0 = model->vert(face[j]);
-            Vec3f v1 = model->vert(face[(j + 1) % 3]);
-            int x0 = (v0.x + 1.) * width / 2.;
-            int y0 = (v0.y + 1.) * height / 2.;
-            int x1 = (v1.x + 1.) * width / 2.;
-            int y1 = (v1.y + 1.) * height / 2.;
-            line(x0, y0, x1, y1, image, white);
-            //Ö»¶ÁÈ¡ÕıÊÓÍ¼v3²»´¦Àí
-        }
-    }
-#pragma region ÎÄ¼şÊä³ö
-    //ÎÄ¼şÊä³ö
+    Vec2i t0[3] = { Vec2i(10, 70),   Vec2i(50, 160),  Vec2i(70, 80) };
+    Vec2i t1[3] = { Vec2i(180, 50),  Vec2i(150, 1),   Vec2i(70, 180) };
+    Vec2i t2[3] = { Vec2i(180, 150), Vec2i(120, 160), Vec2i(130, 180) };
+
+    triangle(t0[0], t0[1], t0[2], image, red);
+    triangle(t1[0], t1[1], t1[2], image, white);
+    triangle(t2[0], t2[1], t2[2], image, green);
+#pragma region æ–‡ä»¶è¾“å‡º
+    //æ–‡ä»¶è¾“å‡º
     image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-    image.write_tga_file("model.tga");
-    delete model;
+    image.write_tga_file("trangle2.tga");
+    
 #pragma endregion
 
     

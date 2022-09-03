@@ -1,0 +1,25 @@
+//for循环中的分支优化
+//把判断单独拿出来，是否这样做取决于for和if的规模
+
+
+if (steep) {//把陡峭判断从for循环中拆出来进行优化，双倍代码 双倍速度
+        for (int x = x0; x <= x1; ++x) {
+            image.set(y, x, color);
+            error2 += derror2;
+            if (error2 > dx) {
+                y += (y1 > y0 ? 1 : -1);
+                error2 -= dx * 2;
+            }
+        }
+    }
+    else {
+        for (int x = x0; x <= x1; ++x) {
+            image.set(x, y, color);
+            error2 += derror2;
+            //震荡方式画像素,优化增长过程（因为本来也是取整）
+            if (error2 > dx) {//优化掉浮点数，直接2y和x比较
+                y += (y1 > y0 ? 1 : -1);
+                error2 -= dx * 2;//同样更改震荡方式
+            }
+        }
+    }
